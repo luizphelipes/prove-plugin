@@ -1098,21 +1098,38 @@ class InstagramPurchaseToasts {
         
         add_submenu_page(
             'instagram-purchase-toasts',
-            'Debug & Test',
-            'Debug & Test',
+            'Dashboard Principal',
+            '📊 Dashboard',
             'manage_options',
-            'instagram-toasts-debug',
-            [$this, 'display_debug_page']
+            'instagram-purchase-toasts',
+            [$this, 'display_admin_page']
         );
         
-        // NOVA PÁGINA: Configurações de API
         add_submenu_page(
             'instagram-purchase-toasts',
-            'Configurações de API',
-            'API Config',
+            'Provas Sociais',
+            '🎯 Provas Sociais',
+            'manage_options',
+            'instagram-toasts-social-proofs',
+            [$this, 'display_social_proofs_page']
+        );
+        
+        add_submenu_page(
+            'instagram-purchase-toasts',
+            'Configurações RapidAPI',
+            '🔧 RapidAPI',
             'manage_options',
             'instagram-toasts-api',
             [$this, 'display_api_page']
+        );
+        
+        add_submenu_page(
+            'instagram-purchase-toasts',
+            'Debug & Diagnóstico',
+            '🔍 Debug',
+            'manage_options',
+            'instagram-toasts-debug',
+            [$this, 'display_debug_page']
         );
     }
     
@@ -1341,66 +1358,146 @@ class InstagramPurchaseToasts {
      */
     public function display_admin_page() {
         $maintenance_mode = get_option('instagram_toasts_maintenance', false);
-        $fallback_mode = get_option('instagram_toasts_fallback_mode', false);
+        $rapidapi_key = get_option('instagram_rapidapi_key', '');
+        
+        // Estatísticas do banco
+        global $wpdb;
+        $stats = [
+            'total_proofs' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}"),
+            'ready_proofs' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'ready'"),
+            'pending_proofs' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'pending'"),
+            'displayed_proofs' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'displayed'"),
+            'total_avatars' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->avatars_table_name}"),
+            'valid_avatars' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->avatars_table_name} WHERE status = 'valid' AND expires_at > NOW()"),
+            'recent_orders' => $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)"),
+            'last_processing' => $wpdb->get_var("SELECT MAX(created_at) FROM {$this->table_name}")
+        ];
+        
+        $next_cron = wp_next_scheduled('instagram_process_orders');
         ?>
         <div class="wrap">
-            <h1>Instagram Purchase Toasts</h1>
+            <h1>🚀 Instagram Purchase Toasts - Dashboard</h1>
             
             <?php if ($maintenance_mode): ?>
                 <div class="notice notice-warning">
-                    <p><strong>Modo de Manutenção Ativo</strong> - O plugin está pausado temporariamente.</p>
+                    <p><strong>⚠️ Modo de Manutenção Ativo</strong> - O plugin está pausado temporariamente.</p>
                 </div>
             <?php endif; ?>
             
-            <?php if ($fallback_mode): ?>
-                <div class="notice notice-info">
-                    <p><strong>Modo Fallback Ativo</strong> - Usando apenas avatares placeholder.</p>
+            <?php if (empty($rapidapi_key)): ?>
+                <div class="notice notice-warning">
+                    <p><strong>⚠️ RapidAPI não configurada</strong> - Configure sua chave API para buscar avatares do Instagram. 
+                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-api'); ?>">Configurar agora</a></p>
                 </div>
             <?php endif; ?>
             
+            <!-- Estatísticas Gerais -->
             <div class="card">
-                <h2>Status do Plugin</h2>
-                <p>
-                    <strong>WooCommerce:</strong> 
-                    <?php echo class_exists('WooCommerce') ? '<span style="color: green;">✓ Ativo</span>' : '<span style="color: red;">✗ Inativo</span>'; ?>
-                </p>
-                <p>
-                    <strong>Plugin de Consulta Instagram:</strong> 
-                    <?php echo class_exists('ConsultaInstagramPlugin') ? '<span style="color: green;">✓ Disponível</span>' : '<span style="color: orange;">⚠ Não encontrado</span>'; ?>
-                </p>
-                <p>
-                    <strong>Modo de Manutenção:</strong> 
-                    <?php echo $maintenance_mode ? '<span style="color: orange;">⚠ Ativo</span>' : '<span style="color: green;">✓ Desativo</span>'; ?>
-                </p>
-                <p>
-                    <strong>Modo Fallback:</strong> 
-                    <?php echo $fallback_mode ? '<span style="color: blue;">ℹ Ativo</span>' : '<span style="color: green;">✓ Desativo</span>'; ?>
-                </p>
+                <h2>📊 Estatísticas em Tempo Real</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #2d5a2d;">✅ Prontas</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #1e7e34;"><?php echo $stats['ready_proofs']; ?></div>
+                        <small>Provas sociais prontas para exibição</small>
+                    </div>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #856404;">⏳ Pendentes</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #b8860b;"><?php echo $stats['pending_proofs']; ?></div>
+                        <small>Aguardando busca de avatar</small>
+                    </div>
+                    <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #0c5460;">📺 Exibidas</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #17a2b8;"><?php echo $stats['displayed_proofs']; ?></div>
+                        <small>Já foram mostradas aos visitantes</small>
+                    </div>
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h3 style="margin: 0; color: #721c24;">📱 Avatares</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #dc3545;"><?php echo $stats['valid_avatars']; ?>/<?php echo $stats['total_avatars']; ?></div>
+                        <small>Avatares válidos no cache</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status do Sistema -->
+            <div class="card">
+                <h2>🔧 Status do Sistema</h2>
+                <table class="widefat">
+                    <tr>
+                        <td><strong>WooCommerce:</strong></td>
+                        <td><?php echo class_exists('WooCommerce') ? '<span style="color: green;">✅ Ativo</span>' : '<span style="color: red;">❌ Inativo</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>RapidAPI:</strong></td>
+                        <td><?php echo !empty($rapidapi_key) ? '<span style="color: green;">✅ Configurada</span>' : '<span style="color: orange;">⚠️ Não configurada</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Modo de Manutenção:</strong></td>
+                        <td><?php echo $maintenance_mode ? '<span style="color: orange;">⚠️ Ativo</span>' : '<span style="color: green;">✅ Desativo</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Próximo Processamento:</strong></td>
+                        <td><?php echo $next_cron ? '<span style="color: blue;">📅 ' . date('d/m/Y H:i', $next_cron) . '</span>' : '<span style="color: red;">❌ Não agendado</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Último Processamento:</strong></td>
+                        <td><?php echo $stats['last_processing'] ? '<span style="color: green;">⏰ ' . date('d/m/Y H:i', strtotime($stats['last_processing'])) . '</span>' : '<span style="color: gray;">Nunca</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Novos pedidos (24h):</strong></td>
+                        <td><span style="color: blue;">📈 <?php echo $stats['recent_orders']; ?> pedidos</span></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Ações Rápidas -->
+            <div class="card">
+                <h2>⚡ Ações Rápidas</h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-social-proofs'); ?>" class="button button-primary">
+                        🎯 Gerenciar Provas Sociais
+                    </a>
+                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-api'); ?>" class="button button-secondary">
+                        🔧 Configurar RapidAPI
+                    </a>
+                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-debug'); ?>" class="button">
+                        🔍 Debug & Diagnóstico
+                    </a>
+                    <button type="button" id="force-processing" class="button">
+                        🚀 Processar Agora
+                    </button>
+                </div>
+            </div>
+            
+            <script>
+            document.getElementById('force-processing').addEventListener('click', function() {
+                this.disabled = true;
+                this.innerHTML = '⏳ Processando...';
                 
-                <h3>Estatísticas de Cache</h3>
-                <?php
-                $cache_key = 'instagram_recent_purchases';
-                $cached_data = get_transient($cache_key);
-                
-                if ($cached_data !== false) {
-                    echo '<p>Pedidos em cache: ' . count($cached_data) . '</p>';
-                    $timeout = get_option('_transient_timeout_' . $cache_key);
-                    if ($timeout) {
-                        echo '<p>Cache expira em: ' . human_time_diff(time(), $timeout) . '</p>';
+                jQuery.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'process_background_orders',
+                        nonce: '<?php echo wp_create_nonce("instagram_toasts_nonce"); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('✅ ' + response.data.message);
+                            location.reload();
+                        } else {
+                            alert('❌ Erro: ' + response.data);
+                        }
+                    },
+                    error: function() {
+                        alert('❌ Erro na comunicação com o servidor');
+                    },
+                    complete: function() {
+                        document.getElementById('force-processing').disabled = false;
+                        document.getElementById('force-processing').innerHTML = '🚀 Processar Agora';
                     }
-                } else {
-                    echo '<p>Nenhum dado em cache</p>';
-                }
-                ?>
-                
-                <p>
-                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-debug'); ?>" class="button button-primary">
-                        Ir para Debug & Test
-                    </a>
-                    <a href="<?php echo admin_url('admin.php?page=instagram-toasts-api'); ?>" class="button">
-                        Configurar API
-                    </a>
-                </p>
+                });
+            });
+            </script>
             </div>
         </div>
         <?php
