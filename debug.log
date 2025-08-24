@@ -1,0 +1,399 @@
+[2025-08-24 00:30:09] Pedidos encontrados com status processing: 10
+[2025-08-24 00:30:10] Processando pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:33:11] Pedidos encontrados com status processing: 10
+[2025-08-24 00:33:12] Processando pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:36:09] AJAX get_recent_purchases iniciado
+[2025-08-24 00:36:09] Nonce verificado com sucesso
+[2025-08-24 00:36:09] Cache não encontrado, buscando pedidos no banco
+[2025-08-24 00:36:09] Argumentos da consulta: Array
+(
+    [status] => Array
+        (
+            [0] => processing
+            [1] => completed
+        )
+
+    [limit] => 20
+    [orderby] => date
+    [order] => DESC
+    [return] => objects
+)
+
+[2025-08-24 00:36:10] Pedidos encontrados: 16
+[2025-08-24 00:36:10] Processando pedido #739 (1/16)
+[2025-08-24 00:36:11] Instagram encontrado no campo 'Instagram': ninacosta011
+[2025-08-24 00:36:11] Pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:36:12] ERRO FATAL: Erro fatal no AJAX get_recent_purchases: Call to private method ConsultaInstagramPlugin::consultar_instagram_rapidapi() from scope InstagramPurchaseToasts
+[2025-08-24 00:36:12] Stack trace: #0 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(387): InstagramPurchaseToasts->fetch_instagram_avatar('ninacosta011')
+#1 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(166): InstagramPurchaseToasts->get_instagram_avatar('ninacosta011')
+#2 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(75): InstagramPurchaseToasts->get_recent_purchases()
+#3 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(324): InstagramPurchaseToasts->get_recent_purchases_ajax('')
+#4 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#5 E:\xampp\htdocs\seguipix\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#6 E:\xampp\htdocs\seguipix\wp-admin\admin-ajax.php(192): do_action('wp_ajax_get_rec...')
+#7 {main}
+[2025-08-24 00:37:02] Cache limpo manualmente pelo administrador
+[2025-08-24 00:39:10] AJAX get_recent_purchases iniciado
+[2025-08-24 00:39:10] Nonce verificado com sucesso
+[2025-08-24 00:39:10] Cache não encontrado, buscando pedidos no banco
+[2025-08-24 00:39:10] Argumentos da consulta: Array
+(
+    [status] => Array
+        (
+            [0] => processing
+            [1] => completed
+        )
+
+    [limit] => 20
+    [orderby] => date
+    [order] => DESC
+    [return] => objects
+)
+
+[2025-08-24 00:39:11] Pedidos encontrados: 16
+[2025-08-24 00:39:11] Processando pedido #739 (1/16)
+[2025-08-24 00:39:11] Instagram encontrado no campo 'Instagram': ninacosta011
+[2025-08-24 00:39:11] Pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:39:13] ERRO FATAL: Erro fatal no AJAX get_recent_purchases: Call to private method ConsultaInstagramPlugin::consultar_instagram_rapidapi() from scope InstagramPurchaseToasts
+[2025-08-24 00:39:13] Stack trace: #0 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(387): InstagramPurchaseToasts->fetch_instagram_avatar('ninacosta011')
+#1 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(166): InstagramPurchaseToasts->get_instagram_avatar('ninacosta011')
+#2 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(75): InstagramPurchaseToasts->get_recent_purchases()
+#3 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(324): InstagramPurchaseToasts->get_recent_purchases_ajax('')
+#4 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#5 E:\xampp\htdocs\seguipix\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#6 E:\xampp\htdocs\seguipix\wp-admin\admin-ajax.php(192): do_action('wp_ajax_get_rec...')
+#7 {main}
+[2025-08-24 00:42:11] AJAX get_recent_purchases iniciado
+[2025-08-24 00:42:11] Nonce verificado com sucesso
+[2025-08-24 00:42:11] Cache não encontrado, buscando pedidos no banco
+[2025-08-24 00:42:11] Argumentos da consulta: Array
+(
+    [status] => Array
+        (
+            [0] => processing
+            [1] => completed
+        )
+
+    [limit] => 20
+    [orderby] => date
+    [order] => DESC
+    [return] => objects
+)
+
+[2025-08-24 00:42:15] Pedidos encontrados: 16
+[2025-08-24 00:42:15] Processando pedido #739 (1/16)
+[2025-08-24 00:42:16] Instagram encontrado no campo 'Instagram': ninacosta011
+[2025-08-24 00:42:16] Pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:42:19] ERRO FATAL: Erro fatal no AJAX get_recent_purchases: Call to private method ConsultaInstagramPlugin::consultar_instagram_rapidapi() from scope InstagramPurchaseToasts
+[2025-08-24 00:42:19] Stack trace: #0 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(387): InstagramPurchaseToasts->fetch_instagram_avatar('ninacosta011')
+#1 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(166): InstagramPurchaseToasts->get_instagram_avatar('ninacosta011')
+#2 E:\xampp\htdocs\seguipix\wp-content\plugins\prove plugin\plugin.php(75): InstagramPurchaseToasts->get_recent_purchases()
+#3 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(324): InstagramPurchaseToasts->get_recent_purchases_ajax('')
+#4 E:\xampp\htdocs\seguipix\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#5 E:\xampp\htdocs\seguipix\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#6 E:\xampp\htdocs\seguipix\wp-admin\admin-ajax.php(192): do_action('wp_ajax_get_rec...')
+#7 {main}
+[2025-08-24 00:42:54] AJAX get_recent_purchases iniciado
+[2025-08-24 00:42:54] Nonce verificado com sucesso
+[2025-08-24 00:42:54] Cache não encontrado, buscando pedidos no banco
+[2025-08-24 00:42:54] Argumentos da consulta: Array
+(
+    [status] => Array
+        (
+            [0] => processing
+            [1] => completed
+        )
+
+    [limit] => 20
+    [orderby] => date
+    [order] => DESC
+    [return] => objects
+)
+
+[2025-08-24 00:42:57] Pedidos encontrados: 16
+[2025-08-24 00:42:57] Processando pedido #739 (1/16)
+[2025-08-24 00:42:58] Instagram encontrado no campo 'Instagram': ninacosta011
+[2025-08-24 00:42:58] Pedido #739 com Instagram: ninacosta011
+[2025-08-24 00:43:00] Cache não encontrado para @ninacosta011, tentando buscar
+[2025-08-24 00:43:00] Tentando buscar avatar para @ninacosta011
+[2025-08-24 00:43:00] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:00] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:00] Método direto não implementado para @ninacosta011
+[2025-08-24 00:43:00] Nenhuma abordagem funcionou para @ninacosta011, usando fallback
+[2025-08-24 00:43:02] Usando avatar fallback para @ninacosta011: https://via.placeholder.com/50x50/E1306C/ffffff?text=N
+[2025-08-24 00:43:02] Pedido #739 adicionado à lista (total: 1)
+[2025-08-24 00:43:02] Processando pedido #734 (2/16)
+[2025-08-24 00:43:03] Instagram encontrado no campo 'Instagram': milenaa_moura_
+[2025-08-24 00:43:03] Pedido #734 com Instagram: milenaa_moura_
+[2025-08-24 00:43:03] Cache não encontrado para @milenaa_moura_, tentando buscar
+[2025-08-24 00:43:03] Tentando buscar avatar para @milenaa_moura_
+[2025-08-24 00:43:03] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:03] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:03] Método direto não implementado para @milenaa_moura_
+[2025-08-24 00:43:03] Nenhuma abordagem funcionou para @milenaa_moura_, usando fallback
+[2025-08-24 00:43:04] Usando avatar fallback para @milenaa_moura_: https://via.placeholder.com/50x50/E1306C/ffffff?text=M
+[2025-08-24 00:43:04] Pedido #734 adicionado à lista (total: 2)
+[2025-08-24 00:43:04] Processando pedido #733 (3/16)
+[2025-08-24 00:43:04] Instagram encontrado no campo 'Instagram': a.wonderfulll
+[2025-08-24 00:43:04] Pedido #733 com Instagram: a.wonderfulll
+[2025-08-24 00:43:04] Cache não encontrado para @a.wonderfulll, tentando buscar
+[2025-08-24 00:43:04] Tentando buscar avatar para @a.wonderfulll
+[2025-08-24 00:43:04] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:04] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:04] Método direto não implementado para @a.wonderfulll
+[2025-08-24 00:43:04] Nenhuma abordagem funcionou para @a.wonderfulll, usando fallback
+[2025-08-24 00:43:04] Usando avatar fallback para @a.wonderfulll: https://via.placeholder.com/50x50/E1306C/ffffff?text=A
+[2025-08-24 00:43:04] Pedido #733 adicionado à lista (total: 3)
+[2025-08-24 00:43:04] Processando pedido #732 (4/16)
+[2025-08-24 00:43:04] Instagram encontrado no campo 'Instagram': leilianemoreira.1984
+[2025-08-24 00:43:04] Pedido #732 com Instagram: leilianemoreira.1984
+[2025-08-24 00:43:04] Cache não encontrado para @leilianemoreira.1984, tentando buscar
+[2025-08-24 00:43:04] Tentando buscar avatar para @leilianemoreira.1984
+[2025-08-24 00:43:04] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:04] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:04] Método direto não implementado para @leilianemoreira.1984
+[2025-08-24 00:43:04] Nenhuma abordagem funcionou para @leilianemoreira.1984, usando fallback
+[2025-08-24 00:43:06] Usando avatar fallback para @leilianemoreira.1984: https://via.placeholder.com/50x50/E1306C/ffffff?text=L
+[2025-08-24 00:43:06] Pedido #732 adicionado à lista (total: 4)
+[2025-08-24 00:43:06] Processando pedido #712 (5/16)
+[2025-08-24 00:43:06] Instagram encontrado no campo 'Instagram': sou_saws_17
+[2025-08-24 00:43:06] Pedido #712 com Instagram: sou_saws_17
+[2025-08-24 00:43:06] Cache não encontrado para @sou_saws_17, tentando buscar
+[2025-08-24 00:43:06] Tentando buscar avatar para @sou_saws_17
+[2025-08-24 00:43:06] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:06] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:06] Método direto não implementado para @sou_saws_17
+[2025-08-24 00:43:06] Nenhuma abordagem funcionou para @sou_saws_17, usando fallback
+[2025-08-24 00:43:07] Usando avatar fallback para @sou_saws_17: https://via.placeholder.com/50x50/E1306C/ffffff?text=S
+[2025-08-24 00:43:07] Pedido #712 adicionado à lista (total: 5)
+[2025-08-24 00:43:07] Processando pedido #711 (6/16)
+[2025-08-24 00:43:07] Instagram encontrado no campo 'Instagram': sou_saws_17
+[2025-08-24 00:43:07] Pedido #711 com Instagram: sou_saws_17
+[2025-08-24 00:43:07] Avatar encontrado no cache para @sou_saws_17
+[2025-08-24 00:43:07] Pedido #711 adicionado à lista (total: 6)
+[2025-08-24 00:43:07] Processando pedido #710 (7/16)
+[2025-08-24 00:43:07] Instagram encontrado no campo 'Instagram': queleabe_
+[2025-08-24 00:43:07] Pedido #710 com Instagram: queleabe_
+[2025-08-24 00:43:07] Cache não encontrado para @queleabe_, tentando buscar
+[2025-08-24 00:43:07] Tentando buscar avatar para @queleabe_
+[2025-08-24 00:43:07] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:07] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:07] Método direto não implementado para @queleabe_
+[2025-08-24 00:43:07] Nenhuma abordagem funcionou para @queleabe_, usando fallback
+[2025-08-24 00:43:07] Usando avatar fallback para @queleabe_: https://via.placeholder.com/50x50/E1306C/ffffff?text=Q
+[2025-08-24 00:43:07] Pedido #710 adicionado à lista (total: 7)
+[2025-08-24 00:43:07] Processando pedido #709 (8/16)
+[2025-08-24 00:43:07] Instagram encontrado no campo 'Instagram': elorran_variedades
+[2025-08-24 00:43:07] Pedido #709 com Instagram: elorran_variedades
+[2025-08-24 00:43:07] Cache não encontrado para @elorran_variedades, tentando buscar
+[2025-08-24 00:43:07] Tentando buscar avatar para @elorran_variedades
+[2025-08-24 00:43:07] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:07] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:07] Método direto não implementado para @elorran_variedades
+[2025-08-24 00:43:07] Nenhuma abordagem funcionou para @elorran_variedades, usando fallback
+[2025-08-24 00:43:07] Usando avatar fallback para @elorran_variedades: https://via.placeholder.com/50x50/E1306C/ffffff?text=E
+[2025-08-24 00:43:07] Pedido #709 adicionado à lista (total: 8)
+[2025-08-24 00:43:07] Processando pedido #707 (9/16)
+[2025-08-24 00:43:07] Instagram encontrado no campo 'Instagram': r.bellozk
+[2025-08-24 00:43:07] Pedido #707 com Instagram: r.bellozk
+[2025-08-24 00:43:07] Cache não encontrado para @r.bellozk, tentando buscar
+[2025-08-24 00:43:07] Tentando buscar avatar para @r.bellozk
+[2025-08-24 00:43:07] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:07] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:07] Método direto não implementado para @r.bellozk
+[2025-08-24 00:43:07] Nenhuma abordagem funcionou para @r.bellozk, usando fallback
+[2025-08-24 00:43:07] Usando avatar fallback para @r.bellozk: https://via.placeholder.com/50x50/E1306C/ffffff?text=R
+[2025-08-24 00:43:07] Pedido #707 adicionado à lista (total: 9)
+[2025-08-24 00:43:07] Processando pedido #698 (10/16)
+[2025-08-24 00:43:07] Instagram encontrado no campo 'Instagram': marques7oficialll
+[2025-08-24 00:43:07] Pedido #698 com Instagram: marques7oficialll
+[2025-08-24 00:43:08] Cache não encontrado para @marques7oficialll, tentando buscar
+[2025-08-24 00:43:08] Tentando buscar avatar para @marques7oficialll
+[2025-08-24 00:43:08] Plugin ConsultaInstagramPlugin encontrado
+[2025-08-24 00:43:08] Métodos públicos disponíveis: __construct, init, enqueue_scripts, ajax_consulta_instagram, ajax_consulta_instagram_posts, replace_product_images_with_instagram, render_instagram_field, validate_instagram_field, add_instagram_field_to_cart_item, display_instagram_field_in_cart, save_instagram_field_in_order, add_admin_menu, register_settings, render_admin_page, render_section_description, render_rapidapi_field, render_enable_posts_field, add_product_meta_box, render_product_meta_box, save_product_meta_box, activate_plugin
+[2025-08-24 00:43:08] Método direto não implementado para @marques7oficialll
+[2025-08-24 00:43:08] Nenhuma abordagem funcionou para @marques7oficialll, usando fallback
+[2025-08-24 00:43:08] Usando avatar fallback para @marques7oficialll: https://via.placeholder.com/50x50/E1306C/ffffff?text=M
+[2025-08-24 00:43:08] Pedido #698 adicionado à lista (total: 10)
+[2025-08-24 00:43:08] Limite de 10 pedidos atingido, parando
+[2025-08-24 00:43:08] Total de pedidos processados com Instagram: 10
+[2025-08-24 00:43:09] Compras obtidas: 10 pedidos
+[2025-08-24 00:44:47] AJAX get_recent_purchases iniciado
+[2025-08-24 00:44:47] Nonce verificado com sucesso
+[2025-08-24 00:44:47] Retornando dados do cache: 10 pedidos
+[2025-08-24 00:44:47] Compras obtidas: 10 pedidos
+[2025-08-24 00:47:09] AJAX get_recent_purchases iniciado
+[2025-08-24 00:47:09] Nonce verificado com sucesso
+[2025-08-24 00:47:09] Retornando dados do cache: 10 pedidos
+[2025-08-24 00:47:09] Compras obtidas: 10 pedidos
+[2025-08-24 00:49:57] AJAX get_recent_purchases iniciado
+[2025-08-24 00:49:57] Nonce verificado com sucesso
+[2025-08-24 00:49:57] Retornando dados do cache: 10 pedidos
+[2025-08-24 00:49:57] Compras obtidas: 10 pedidos
+[2025-08-24 00:52:57] AJAX get_recent_purchases iniciado
+[2025-08-24 00:52:57] Nonce verificado com sucesso
+[2025-08-24 00:52:57] Retornando dados do cache: 10 pedidos
+[2025-08-24 00:52:57] Compras obtidas: 10 pedidos
+[2025-08-24 00:55:57] AJAX get_recent_purchases iniciado
+[2025-08-24 00:55:57] Nonce verificado com sucesso
+[2025-08-24 00:55:57] Retornando dados do cache: 10 pedidos
+[2025-08-24 00:55:57] Compras obtidas: 10 pedidos
+[2025-08-24 01:02:10] AJAX get_recent_purchases iniciado
+[2025-08-24 01:02:10] Nonce verificado com sucesso
+[2025-08-24 01:02:10] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:02:10] Compras obtidas: 10 pedidos
+[2025-08-24 01:02:27] AJAX get_recent_purchases iniciado
+[2025-08-24 01:02:27] Nonce verificado com sucesso
+[2025-08-24 01:02:27] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:02:27] Compras obtidas: 10 pedidos
+[2025-08-24 01:05:01] AJAX get_recent_purchases iniciado
+[2025-08-24 01:05:01] Nonce verificado com sucesso
+[2025-08-24 01:05:01] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:05:01] Compras obtidas: 10 pedidos
+[2025-08-24 01:07:58] AJAX get_recent_purchases iniciado
+[2025-08-24 01:07:58] Nonce verificado com sucesso
+[2025-08-24 01:07:58] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:07:58] Compras obtidas: 10 pedidos
+[2025-08-24 01:10:57] AJAX get_recent_purchases iniciado
+[2025-08-24 01:10:57] Nonce verificado com sucesso
+[2025-08-24 01:10:57] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:10:57] Compras obtidas: 10 pedidos
+[2025-08-24 01:14:00] AJAX get_recent_purchases iniciado
+[2025-08-24 01:14:00] Nonce verificado com sucesso
+[2025-08-24 01:14:00] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:14:00] Compras obtidas: 10 pedidos
+[2025-08-24 01:16:59] AJAX get_recent_purchases iniciado
+[2025-08-24 01:16:59] Nonce verificado com sucesso
+[2025-08-24 01:16:59] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:16:59] Compras obtidas: 10 pedidos
+[2025-08-24 01:18:58] AJAX get_recent_purchases iniciado
+[2025-08-24 01:18:58] Nonce verificado com sucesso
+[2025-08-24 01:18:58] Cache não encontrado, buscando pedidos no banco
+[2025-08-24 01:18:58] Argumentos da consulta: Array
+(
+    [status] => Array
+        (
+            [0] => processing
+            [1] => completed
+        )
+
+    [limit] => 20
+    [orderby] => date
+    [order] => DESC
+    [return] => objects
+)
+
+[2025-08-24 01:18:59] Pedidos encontrados: 16
+[2025-08-24 01:18:59] Processando pedido #739 (1/16)
+[2025-08-24 01:18:59] Instagram encontrado no campo 'Instagram': ninacosta011
+[2025-08-24 01:19:00] Pedido #739 com Instagram: ninacosta011
+[2025-08-24 01:19:00] Avatar encontrado no cache para @ninacosta011
+[2025-08-24 01:19:00] Pedido #739 adicionado à lista (total: 1)
+[2025-08-24 01:19:00] Processando pedido #734 (2/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': milenaa_moura_
+[2025-08-24 01:19:00] Pedido #734 com Instagram: milenaa_moura_
+[2025-08-24 01:19:00] Avatar encontrado no cache para @milenaa_moura_
+[2025-08-24 01:19:00] Pedido #734 adicionado à lista (total: 2)
+[2025-08-24 01:19:00] Processando pedido #733 (3/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': a.wonderfulll
+[2025-08-24 01:19:00] Pedido #733 com Instagram: a.wonderfulll
+[2025-08-24 01:19:00] Avatar encontrado no cache para @a.wonderfulll
+[2025-08-24 01:19:00] Pedido #733 adicionado à lista (total: 3)
+[2025-08-24 01:19:00] Processando pedido #732 (4/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': leilianemoreira.1984
+[2025-08-24 01:19:00] Pedido #732 com Instagram: leilianemoreira.1984
+[2025-08-24 01:19:00] Avatar encontrado no cache para @leilianemoreira.1984
+[2025-08-24 01:19:00] Pedido #732 adicionado à lista (total: 4)
+[2025-08-24 01:19:00] Processando pedido #712 (5/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': sou_saws_17
+[2025-08-24 01:19:00] Pedido #712 com Instagram: sou_saws_17
+[2025-08-24 01:19:00] Avatar encontrado no cache para @sou_saws_17
+[2025-08-24 01:19:00] Pedido #712 adicionado à lista (total: 5)
+[2025-08-24 01:19:00] Processando pedido #711 (6/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': sou_saws_17
+[2025-08-24 01:19:00] Pedido #711 com Instagram: sou_saws_17
+[2025-08-24 01:19:00] Avatar encontrado no cache para @sou_saws_17
+[2025-08-24 01:19:00] Pedido #711 adicionado à lista (total: 6)
+[2025-08-24 01:19:00] Processando pedido #710 (7/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': queleabe_
+[2025-08-24 01:19:00] Pedido #710 com Instagram: queleabe_
+[2025-08-24 01:19:00] Avatar encontrado no cache para @queleabe_
+[2025-08-24 01:19:00] Pedido #710 adicionado à lista (total: 7)
+[2025-08-24 01:19:00] Processando pedido #709 (8/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': elorran_variedades
+[2025-08-24 01:19:00] Pedido #709 com Instagram: elorran_variedades
+[2025-08-24 01:19:00] Avatar encontrado no cache para @elorran_variedades
+[2025-08-24 01:19:00] Pedido #709 adicionado à lista (total: 8)
+[2025-08-24 01:19:00] Processando pedido #707 (9/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': r.bellozk
+[2025-08-24 01:19:00] Pedido #707 com Instagram: r.bellozk
+[2025-08-24 01:19:00] Avatar encontrado no cache para @r.bellozk
+[2025-08-24 01:19:00] Pedido #707 adicionado à lista (total: 9)
+[2025-08-24 01:19:00] Processando pedido #698 (10/16)
+[2025-08-24 01:19:00] Instagram encontrado no campo 'Instagram': marques7oficialll
+[2025-08-24 01:19:00] Pedido #698 com Instagram: marques7oficialll
+[2025-08-24 01:19:00] Avatar encontrado no cache para @marques7oficialll
+[2025-08-24 01:19:00] Pedido #698 adicionado à lista (total: 10)
+[2025-08-24 01:19:00] Limite de 10 pedidos atingido, parando
+[2025-08-24 01:19:00] Total de pedidos processados com Instagram: 10
+[2025-08-24 01:19:01] Compras obtidas: 10 pedidos
+[2025-08-24 01:21:53] AJAX get_recent_purchases iniciado
+[2025-08-24 01:21:53] Nonce verificado com sucesso
+[2025-08-24 01:21:53] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:21:53] Compras obtidas: 10 pedidos
+[2025-08-24 01:22:31] AJAX get_recent_purchases iniciado
+[2025-08-24 01:22:31] Nonce verificado com sucesso
+[2025-08-24 01:22:31] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:22:31] Compras obtidas: 10 pedidos
+[2025-08-24 01:25:40] AJAX get_recent_purchases iniciado
+[2025-08-24 01:25:40] Nonce verificado com sucesso
+[2025-08-24 01:25:40] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:25:40] Compras obtidas: 10 pedidos
+[2025-08-24 01:27:41] AJAX get_recent_purchases iniciado
+[2025-08-24 01:27:41] Nonce verificado com sucesso
+[2025-08-24 01:27:41] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:27:41] Compras obtidas: 10 pedidos
+[2025-08-24 01:29:35] AJAX get_recent_purchases iniciado
+[2025-08-24 01:29:35] Nonce verificado com sucesso
+[2025-08-24 01:29:35] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:29:35] Compras obtidas: 10 pedidos
+[2025-08-24 01:31:26] AJAX get_recent_purchases iniciado
+[2025-08-24 01:31:26] Nonce verificado com sucesso
+[2025-08-24 01:31:26] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:31:26] Compras obtidas: 10 pedidos
+[2025-08-24 01:31:58] AJAX get_recent_purchases iniciado
+[2025-08-24 01:31:58] Nonce verificado com sucesso
+[2025-08-24 01:31:58] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:31:58] Compras obtidas: 10 pedidos
+[2025-08-24 01:32:32] AJAX get_recent_purchases iniciado
+[2025-08-24 01:32:32] Nonce verificado com sucesso
+[2025-08-24 01:32:32] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:32:32] Compras obtidas: 10 pedidos
+[2025-08-24 01:33:23] AJAX get_recent_purchases iniciado
+[2025-08-24 01:33:23] Nonce verificado com sucesso
+[2025-08-24 01:33:23] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:33:23] Compras obtidas: 10 pedidos
+[2025-08-24 01:34:10] AJAX get_recent_purchases iniciado
+[2025-08-24 01:34:10] Nonce verificado com sucesso
+[2025-08-24 01:34:10] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:34:10] Compras obtidas: 10 pedidos
+[2025-08-24 01:34:44] AJAX get_recent_purchases iniciado
+[2025-08-24 01:34:44] Nonce verificado com sucesso
+[2025-08-24 01:34:44] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:34:44] Compras obtidas: 10 pedidos
+[2025-08-24 01:35:18] AJAX get_recent_purchases iniciado
+[2025-08-24 01:35:18] Nonce verificado com sucesso
+[2025-08-24 01:35:18] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:35:18] Compras obtidas: 10 pedidos
+[2025-08-24 01:38:12] AJAX get_recent_purchases iniciado
+[2025-08-24 01:38:12] Nonce verificado com sucesso
+[2025-08-24 01:38:12] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:38:12] Compras obtidas: 10 pedidos
+[2025-08-24 01:41:12] AJAX get_recent_purchases iniciado
+[2025-08-24 01:41:12] Nonce verificado com sucesso
+[2025-08-24 01:41:12] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:41:12] Compras obtidas: 10 pedidos
+[2025-08-24 01:44:15] AJAX get_recent_purchases iniciado
+[2025-08-24 01:44:15] Nonce verificado com sucesso
+[2025-08-24 01:44:15] Retornando dados do cache: 10 pedidos
+[2025-08-24 01:44:15] Compras obtidas: 10 pedidos
