@@ -196,14 +196,15 @@ jQuery(document).ready(function($) {
     }
     
     function processPurchases(purchases) {
-        console.log('Instagram Purchase Toasts: Processando ' + purchases.length + ' compras');
+        console.log('Instagram Purchase Toasts: Processando ' + purchases.length + ' provas sociais');
         let newPurchases = 0;
         purchases.forEach(purchase => {
-            const orderId = purchase.order_id.toString();
-            if (!processedOrders.has(orderId)) {
-                console.log('Instagram Purchase Toasts: Novo pedido encontrado - ' + orderId, purchase);
+            // Usar ID da prova social ao invés do order_id para evitar duplicatas por produto
+            const proofId = purchase.id.toString();
+            if (!processedOrders.has(proofId)) {
+                console.log('Instagram Purchase Toasts: Nova prova social encontrada - ID:' + proofId, purchase);
                 toastQueue.push(purchase);
-                processedOrders.add(orderId);
+                processedOrders.add(proofId);
                 newPurchases++;
             }
         });
@@ -261,9 +262,37 @@ jQuery(document).ready(function($) {
             toast.removeClass('show');
             setTimeout(() => {
                 toast.remove();
+                
+                // Marcar toast como exibido no backend
+                if (purchase.id) {
+                    markToastAsDisplayed(purchase.id);
+                }
+                
                 setTimeout(() => showNextToast(), 1000);
             }, 500);
         }, 8000);
+    }
+    
+    function markToastAsDisplayed(proofId) {
+        $.ajax({
+            url: instagram_toasts.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'mark_toast_displayed',
+                proof_id: proofId,
+                nonce: instagram_toasts.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    console.log('Instagram Purchase Toasts: Toast ID ' + proofId + ' marcado como exibido');
+                } else {
+                    console.error('Instagram Purchase Toasts: Erro ao marcar toast como exibido:', response.data);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Instagram Purchase Toasts: Erro AJAX ao marcar toast como exibido:', error);
+            }
+        });
     }
     
     window.handleAvatarError = function(img) {

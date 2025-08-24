@@ -11,8 +11,15 @@ if (!defined('ABSPATH')) exit;
 class InstagramPurchaseToasts {
     
     private $cache_timeout = 86400; // 24 horas em segundos
+    private $table_name;
+    private $avatars_table_name;
     
     public function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'instagram_social_proofs';
+        $this->avatars_table_name = $wpdb->prefix . 'instagram_avatars';
+        
+        register_activation_hook(__FILE__, [$this, 'create_tables']);
         add_action('init', [$this, 'init']);
     }
     
@@ -31,6 +38,10 @@ class InstagramPurchaseToasts {
         add_action('wp_ajax_nopriv_debug_orders', [$this, 'debug_orders_ajax']);
         add_action('wp_ajax_force_cache_update', [$this, 'force_cache_update_ajax']);
         add_action('wp_ajax_nopriv_force_cache_update', [$this, 'force_cache_update_ajax']);
+        
+        // AJAX para marcar toast como exibido
+        add_action('wp_ajax_mark_toast_displayed', [$this, 'mark_toast_displayed_ajax']);
+        add_action('wp_ajax_nopriv_mark_toast_displayed', [$this, 'mark_toast_displayed_ajax']);
 
         // Adicionar menu de administração
         add_action('admin_menu', [$this, 'add_admin_menu']);
@@ -45,51 +56,501 @@ class InstagramPurchaseToasts {
             wp_schedule_event(time(), 'daily', 'instagram_toasts_cleanup');
         }
         add_action('instagram_toasts_cleanup', [$this, 'cleanup_old_cache']);
+        
+        // Processar pedidos em background
+        add_action('wp_ajax_process_background_orders', [$this, 'process_background_orders']);
+        add_action('wp_ajax_nopriv_process_background_orders', [$this, 'process_background_orders']);
+        
+        // Agendar processamento em background
+        if (!wp_next_scheduled('instagram_process_orders')) {
+            wp_schedule_event(time(), 'hourly', 'instagram_process_orders');
+        }
+        add_action('instagram_process_orders', [$this, 'process_orders_background']);
     }
     
     /**
-     * AJAX handler com tratamento robusto de erros
+     * Criar tabelas do banco de dados
+     */
+    public function create_tables() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Tabela para armazenar provas sociais processadas
+        $sql_social_proofs = "CREATE TABLE {$this->table_name} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            order_id bigint(20) unsigned NOT NULL,
+            instagram_username varchar(100) NOT NULL,
+            customer_name varchar(200) NOT NULL,
+            product_name varchar(500) NOT NULL,
+            product_price decimal(10,2) DEFAULT NULL,
+            product_permalink varchar(500) DEFAULT NULL,
+            order_date datetime NOT NULL,
+            avatar_url varchar(500) DEFAULT NULL,
+            avatar_fetched tinyint(1) DEFAULT 0,
+            display_count int(11) DEFAULT 0,
+            last_displayed datetime DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            status enum('pending','ready','displayed','expired') DEFAULT 'pending',
+            PRIMARY KEY (id),
+            UNIQUE KEY unique_order_product (order_id, product_name(100)),
+            KEY idx_instagram_username (instagram_username),
+            KEY idx_status (status),
+            KEY idx_avatar_fetched (avatar_fetched),
+            KEY idx_order_date (order_date)
+        ) $charset_collate;";
+        
+        // Tabela para cache de avatares do Instagram
+        $sql_avatars = "CREATE TABLE {$this->avatars_table_name} (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            username varchar(100) NOT NULL,
+            avatar_url varchar(500) NOT NULL,
+            avatar_hd_url varchar(500) DEFAULT NULL,
+            fetched_at datetime DEFAULT CURRENT_TIMESTAMP,
+            expires_at datetime NOT NULL,
+            fetch_attempts int(11) DEFAULT 1,
+            last_error text DEFAULT NULL,
+            status enum('valid','expired','error') DEFAULT 'valid',
+            PRIMARY KEY (id),
+            UNIQUE KEY unique_username (username),
+            KEY idx_status (status),
+            KEY idx_expires_at (expires_at)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql_social_proofs);
+        dbDelta($sql_avatars);
+        
+        $this->log_message('Tabelas do banco de dados criadas/atualizadas com sucesso');
+    }
+    
+    /**
+     * AJAX handler para buscar provas sociais prontas (dados locais)
      */
     public function get_recent_purchases_ajax() {
         try {
-            // Log de início
-            $this->log_message('AJAX get_recent_purchases iniciado');
-            
-            // Verificar se WooCommerce está ativo
-            if (!class_exists('WooCommerce')) {
-                $this->log_message('ERRO: WooCommerce não está ativo');
-                wp_send_json_error('WooCommerce não está ativo');
-                return;
-            }
-            
             // Verificar nonce
             if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'instagram_toasts_nonce')) {
-                $this->log_message('ERRO: Nonce inválido');
                 wp_send_json_error('Nonce inválido');
                 return;
             }
             
-            $this->log_message('Nonce verificado com sucesso');
+            // Buscar provas sociais prontas do banco local
+            $social_proofs = $this->get_ready_social_proofs();
             
-            // Buscar compras recentes
-            $purchases = $this->get_recent_purchases();
+            $this->log_message('Provas sociais obtidas do banco local: ' . count($social_proofs));
             
-            $this->log_message('Compras obtidas: ' . count($purchases) . ' pedidos');
-            
-            wp_send_json_success($purchases);
+            wp_send_json_success($social_proofs);
             
         } catch (Exception $e) {
-            $error_message = 'Erro no AJAX get_recent_purchases: ' . $e->getMessage();
-            $this->log_message('ERRO CRÍTICO: ' . $error_message);
-            $this->log_message('Stack trace: ' . $e->getTraceAsString());
+            $this->log_message('ERRO: ' . $e->getMessage());
+            wp_send_json_error($e->getMessage());
+        }
+    }
+    
+    /**
+     * Buscar provas sociais prontas para exibição (dados locais)
+     */
+    private function get_ready_social_proofs($limit = 10) {
+        global $wpdb;
+        
+        $results = $wpdb->get_results($wpdb->prepare("
+            SELECT 
+                id,
+                order_id,
+                instagram_username,
+                customer_name,
+                product_name,
+                product_price,
+                product_permalink,
+                order_date,
+                avatar_url,
+                display_count,
+                last_displayed
+            FROM {$this->table_name} 
+            WHERE status = 'ready' 
+            AND avatar_fetched = 1
+            AND avatar_url IS NOT NULL
+            ORDER BY 
+                CASE 
+                    WHEN last_displayed IS NULL THEN 0 
+                    ELSE TIMESTAMPDIFF(HOUR, last_displayed, NOW()) 
+                END DESC,
+                order_date DESC
+            LIMIT %d
+        ", $limit));
+        
+        $social_proofs = [];
+        foreach ($results as $row) {
+            $social_proofs[] = [
+                'id' => $row->id,
+                'order_id' => $row->order_id,
+                'instagram_username' => $row->instagram_username,
+                'customer_name' => $row->customer_name,
+                'avatar_url' => $row->avatar_url,
+                'products' => [[
+                    'name' => $row->product_name,
+                    'price' => $row->product_price ? number_format((float)$row->product_price, 2, ',', '.') : null,
+                    'permalink' => $row->product_permalink ?: '#'
+                ]],
+                'order_date' => $row->order_date,
+                'display_count' => (int)$row->display_count,
+                'last_displayed' => $row->last_displayed
+            ];
+        }
+        
+        return $social_proofs;
+    }
+    
+    /**
+     * Processar pedidos em background e salvar como provas sociais
+     */
+    public function process_orders_background() {
+        try {
+            if (!class_exists('WooCommerce')) {
+                $this->log_message('WooCommerce não está ativo para processamento em background');
+                return;
+            }
             
-            wp_send_json_error($error_message);
-        } catch (Error $e) {
-            $error_message = 'Erro fatal no AJAX get_recent_purchases: ' . $e->getMessage();
-            $this->log_message('ERRO FATAL: ' . $error_message);
-            $this->log_message('Stack trace: ' . $e->getTraceAsString());
+            $this->log_message('Iniciando processamento de pedidos em background');
             
-            wp_send_json_error($error_message);
+            // Buscar pedidos recentes que ainda não foram processados
+            $processed_orders = $this->process_new_orders();
+            
+            // Buscar avatares pendentes
+            $avatars_processed = $this->fetch_pending_avatars();
+            
+            $this->log_message("Processamento em background concluído. Pedidos: {$processed_orders}, Avatares: {$avatars_processed}");
+            
+        } catch (Exception $e) {
+            $this->log_message('ERRO no processamento em background: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Processar novos pedidos e salvar como provas sociais
+     */
+    private function process_new_orders() {
+        global $wpdb;
+        
+        // Buscar pedidos dos últimos 7 dias que ainda não foram processados
+        $args = [
+            'status' => ['processing', 'completed'],
+            'limit' => 50,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'date_created' => '>' . (time() - (7 * 24 * 60 * 60)),
+            'return' => 'objects'
+        ];
+        
+        $orders = wc_get_orders($args);
+        $processed_count = 0;
+        
+        foreach ($orders as $order) {
+            try {
+                $order_id = $order->get_id();
+                
+                // Verificar se já foi processado
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$this->table_name} WHERE order_id = %d",
+                    $order_id
+                ));
+                
+                if ($exists > 0) {
+                    continue; // Já processado
+                }
+                
+                // Obter dados do Instagram do pedido
+                $instagram_username = $this->get_instagram_from_order($order);
+                
+                if (empty($instagram_username)) {
+                    continue; // Sem Instagram
+                }
+                
+                // Obter produtos do pedido
+                $products = $this->get_products_from_order($order);
+                
+                if (empty($products)) {
+                    continue; // Sem produtos válidos
+                }
+                
+                // Salvar cada produto como uma prova social
+                foreach ($products as $product) {
+                    $data = [
+                        'order_id' => $order_id,
+                        'instagram_username' => sanitize_text_field($instagram_username),
+                        'customer_name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                        'product_name' => $product['name'],
+                        'product_price' => $product['price'],
+                        'product_permalink' => $product['permalink'],
+                        'order_date' => $order->get_date_created()->format('Y-m-d H:i:s'),
+                        'status' => 'pending'
+                    ];
+                    
+                    $result = $wpdb->insert($this->table_name, $data);
+                    
+                    if ($result !== false) {
+                        $processed_count++;
+                        $this->log_message("Prova social salva: pedido #{$order_id}, produto: {$product['name']}, Instagram: @{$instagram_username}");
+                    }
+                }
+                
+            } catch (Exception $e) {
+                $this->log_message("Erro ao processar pedido #{$order_id}: " . $e->getMessage());
+            }
+        }
+        
+        return $processed_count;
+    }
+    
+    /**
+     * Buscar avatares pendentes via RapidAPI
+     */
+    private function fetch_pending_avatars($limit = 5) {
+        global $wpdb;
+        
+        // Buscar usernames únicos que ainda não têm avatar válido
+        $pending_usernames = $wpdb->get_col($wpdb->prepare("
+            SELECT DISTINCT sp.instagram_username 
+            FROM {$this->table_name} sp 
+            LEFT JOIN {$this->avatars_table_name} av ON sp.instagram_username = av.username 
+            WHERE sp.status = 'pending' 
+            AND sp.avatar_fetched = 0
+            AND (av.username IS NULL OR av.status = 'expired' OR av.expires_at < NOW())
+            LIMIT %d
+        ", $limit));
+        
+        $fetched_count = 0;
+        
+        foreach ($pending_usernames as $username) {
+            if ($this->fetch_instagram_avatar_rapidapi($username)) {
+                $fetched_count++;
+                
+                // Marcar todas as provas sociais deste usuário como prontas
+                $avatar_url = $this->get_cached_avatar($username);
+                if ($avatar_url) {
+                    $wpdb->update(
+                        $this->table_name,
+                        [
+                            'avatar_url' => $avatar_url,
+                            'avatar_fetched' => 1,
+                            'status' => 'ready'
+                        ],
+                        ['instagram_username' => $username],
+                        ['%s', '%d', '%s'],
+                        ['%s']
+                    );
+                    
+                    $this->log_message("Avatar fetchado e provas sociais atualizadas para @{$username}");
+                }
+            }
+            
+            // Delay entre requisições para evitar rate limiting
+            sleep(1);
+        }
+        
+        return $fetched_count;
+    }
+    
+    /**
+     * Buscar avatar do Instagram via RapidAPI
+     */
+    private function fetch_instagram_avatar_rapidapi($username) {
+        global $wpdb;
+        
+        try {
+            $api_key = get_option('instagram_rapidapi_key');
+            $api_host = get_option('instagram_rapidapi_host', 'instagram-bulk-profile-scrapper.p.rapidapi.com');
+            
+            if (empty($api_key)) {
+                $this->log_message("API key não configurada para buscar avatar de @{$username}");
+                return false;
+            }
+            
+            $this->log_message("Buscando avatar via RapidAPI para @{$username}");
+            
+            // Fazer requisição para RapidAPI
+            $response = wp_remote_post("https://{$api_host}/clients/api/ig/ig_profile", [
+                'headers' => [
+                    'X-RapidAPI-Key' => $api_key,
+                    'X-RapidAPI-Host' => $api_host,
+                    'Content-Type' => 'application/json'
+                ],
+                'body' => json_encode([
+                    'ig' => $username
+                ]),
+                'timeout' => 30
+            ]);
+            
+            if (is_wp_error($response)) {
+                throw new Exception('Erro na requisição: ' . $response->get_error_message());
+            }
+            
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            
+            if (!$data || !isset($data[0]['profile_pic_url'])) {
+                throw new Exception('Resposta inválida da API');
+            }
+            
+            $avatar_url = $data[0]['profile_pic_url'];
+            $avatar_hd_url = $data[0]['profile_pic_url_hd'] ?? $avatar_url;
+            
+            // Salvar no cache
+            $cache_data = [
+                'username' => $username,
+                'avatar_url' => $avatar_url,
+                'avatar_hd_url' => $avatar_hd_url,
+                'expires_at' => date('Y-m-d H:i:s', time() + (7 * 24 * 60 * 60)), // 7 dias
+                'status' => 'valid'
+            ];
+            
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$this->avatars_table_name} WHERE username = %s",
+                $username
+            ));
+            
+            if ($existing) {
+                $wpdb->update(
+                    $this->avatars_table_name,
+                    $cache_data,
+                    ['username' => $username],
+                    ['%s', '%s', '%s', '%s', '%s'],
+                    ['%s']
+                );
+            } else {
+                $wpdb->insert($this->avatars_table_name, $cache_data);
+            }
+            
+            $this->log_message("Avatar salvo com sucesso para @{$username}: {$avatar_url}");
+            return true;
+            
+        } catch (Exception $e) {
+            $this->log_message("Erro ao buscar avatar para @{$username}: " . $e->getMessage());
+            
+            // Salvar erro no cache para evitar tentativas repetidas
+            $error_data = [
+                'username' => $username,
+                'avatar_url' => $this->get_fallback_avatar($username),
+                'expires_at' => date('Y-m-d H:i:s', time() + (24 * 60 * 60)), // 1 dia
+                'last_error' => $e->getMessage(),
+                'status' => 'error',
+                'fetch_attempts' => 1
+            ];
+            
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$this->avatars_table_name} WHERE username = %s",
+                $username
+            ));
+            
+            if ($existing) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$this->avatars_table_name} SET fetch_attempts = fetch_attempts + 1, last_error = %s WHERE username = %s",
+                    $e->getMessage(),
+                    $username
+                ));
+            } else {
+                $wpdb->insert($this->avatars_table_name, $error_data);
+            }
+            
+            return false;
+        }
+    }
+    
+    /**
+     * Obter avatar do cache local
+     */
+    private function get_cached_avatar($username) {
+        global $wpdb;
+        
+        $result = $wpdb->get_var($wpdb->prepare(
+            "SELECT avatar_url FROM {$this->avatars_table_name} WHERE username = %s AND status = 'valid' AND expires_at > NOW()",
+            $username
+        ));
+        
+        return $result ?: $this->get_fallback_avatar($username);
+    }
+    
+    /**
+     * Gerar avatar fallback
+     */
+    private function get_fallback_avatar($username) {
+        $initial = strtoupper(substr($username, 0, 1));
+        return "https://via.placeholder.com/100x100/E1306C/ffffff?text={$initial}";
+    }
+    
+    /**
+     * AJAX para marcar toast como exibido
+     */
+    public function mark_toast_displayed_ajax() {
+        try {
+            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'instagram_toasts_nonce')) {
+                wp_send_json_error('Nonce inválido');
+                return;
+            }
+            
+            $proof_id = intval($_POST['proof_id']);
+            
+            if ($proof_id <= 0) {
+                wp_send_json_error('ID inválido');
+                return;
+            }
+            
+            global $wpdb;
+            
+            $result = $wpdb->update(
+                $this->table_name,
+                [
+                    'display_count' => new \Exception('display_count + 1'), // Raw SQL
+                    'last_displayed' => current_time('mysql'),
+                    'status' => 'displayed'
+                ],
+                ['id' => $proof_id],
+                ['%s', '%s', '%s'],
+                ['%d']
+            );
+            
+            // Como não podemos usar raw SQL no $wpdb->update, vamos fazer com query direta
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$this->table_name} SET display_count = display_count + 1, last_displayed = %s, status = 'displayed' WHERE id = %d",
+                current_time('mysql'),
+                $proof_id
+            ));
+            
+            wp_send_json_success('Toast marcado como exibido');
+            
+        } catch (Exception $e) {
+            wp_send_json_error($e->getMessage());
+        }
+    }
+    
+    /**
+     * AJAX handler para processar pedidos manualmente (admin)
+     */
+    public function process_background_orders() {
+        try {
+            if (!current_user_can('manage_options')) {
+                wp_send_json_error('Sem permissão');
+                return;
+            }
+            
+            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'instagram_toasts_nonce')) {
+                wp_send_json_error('Nonce inválido');
+                return;
+            }
+            
+            $processed_orders = $this->process_new_orders();
+            $avatars_processed = $this->fetch_pending_avatars();
+            
+            wp_send_json_success([
+                'orders_processed' => $processed_orders,
+                'avatars_processed' => $avatars_processed,
+                'message' => "Processamento concluído. Pedidos: {$processed_orders}, Avatares: {$avatars_processed}"
+            ]);
+            
+        } catch (Exception $e) {
+            wp_send_json_error($e->getMessage());
         }
     }
     
@@ -661,21 +1122,58 @@ class InstagramPurchaseToasts {
     public function display_api_page() {
         // Salvar configurações se enviadas
         if (isset($_POST['save_api_settings']) && check_admin_referer('api_settings')) {
-            update_option('instagram_api_key', sanitize_text_field($_POST['api_key']));
-            update_option('instagram_api_endpoint', esc_url_raw($_POST['api_endpoint']));
+            update_option('instagram_rapidapi_key', sanitize_text_field($_POST['rapidapi_key']));
+            update_option('instagram_rapidapi_host', sanitize_text_field($_POST['rapidapi_host']));
             
-            echo '<div class="notice notice-success"><p>Configurações salvas com sucesso!</p></div>';
+            echo '<div class="notice notice-success"><p>Configurações RapidAPI salvas com sucesso!</p></div>';
         }
         
-        $api_key = get_option('instagram_api_key', '');
-        $api_endpoint = get_option('instagram_api_endpoint', '');
+        // Processar pedidos manualmente se solicitado
+        if (isset($_POST['process_orders_manual']) && check_admin_referer('process_orders')) {
+            $processed_orders = $this->process_new_orders();
+            $avatars_processed = $this->fetch_pending_avatars(10);
+            echo '<div class="notice notice-success"><p>Processamento manual concluído! Pedidos: ' . $processed_orders . ', Avatares: ' . $avatars_processed . '</p></div>';
+        }
+        
+        $rapidapi_key = get_option('instagram_rapidapi_key', '');
+        $rapidapi_host = get_option('instagram_rapidapi_host', 'instagram-bulk-profile-scrapper.p.rapidapi.com');
+        
+        // Estatísticas do banco
+        global $wpdb;
+        $total_proofs = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name}");
+        $ready_proofs = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'ready'");
+        $pending_proofs = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table_name} WHERE status = 'pending'");
+        $total_avatars = $wpdb->get_var("SELECT COUNT(*) FROM {$this->avatars_table_name}");
+        $valid_avatars = $wpdb->get_var("SELECT COUNT(*) FROM {$this->avatars_table_name} WHERE status = 'valid' AND expires_at > NOW()");
         ?>
         <div class="wrap">
-            <h1>Configurações de API do Instagram</h1>
+            <h1>🚀 Configurações RapidAPI - Instagram Toasts</h1>
             
             <div class="card">
-                <h2>Configuração da API</h2>
-                <p>Configure suas próprias credenciais de API para buscar avatares do Instagram.</p>
+                <h2>📊 Estatísticas do Sistema</h2>
+                <table class="widefat">
+                    <tr>
+                        <td><strong>Total de Provas Sociais:</strong></td>
+                        <td><?php echo $total_proofs; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prontas para Exibição:</strong></td>
+                        <td style="color: green;"><strong><?php echo $ready_proofs; ?></strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Aguardando Avatar:</strong></td>
+                        <td style="color: orange;"><?php echo $pending_proofs; ?></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Avatares no Cache:</strong></td>
+                        <td><?php echo $total_avatars; ?> (<?php echo $valid_avatars; ?> válidos)</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>⚙️ Configuração RapidAPI</h2>
+                <p>Configure sua chave RapidAPI para buscar avatares do Instagram automaticamente.</p>
                 
                 <form method="post">
                     <?php wp_nonce_field('api_settings'); ?>
@@ -683,28 +1181,41 @@ class InstagramPurchaseToasts {
                     <table class="form-table">
                         <tr>
                             <th scope="row">
-                                <label for="api_key">Chave da API</label>
+                                <label for="rapidapi_key">RapidAPI Key</label>
                             </th>
                             <td>
-                                <input type="text" id="api_key" name="api_key" value="<?php echo esc_attr($api_key); ?>" class="regular-text" />
-                                <p class="description">Sua chave de API do RapidAPI ou Instagram Basic Display API</p>
+                                <input type="password" id="rapidapi_key" name="rapidapi_key" value="<?php echo esc_attr($rapidapi_key); ?>" class="regular-text" />
+                                <p class="description">Sua chave da RapidAPI. <a href="https://rapidapi.com/hub" target="_blank">Obter chave aqui</a></p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="api_endpoint">Endpoint da API</label>
+                                <label for="rapidapi_host">RapidAPI Host</label>
                             </th>
                             <td>
-                                <input type="url" id="api_endpoint" name="api_endpoint" value="<?php echo esc_attr($api_endpoint); ?>" class="regular-text" />
-                                <p class="description">URL do endpoint para buscar dados do usuário</p>
+                                <input type="text" id="rapidapi_host" name="rapidapi_host" value="<?php echo esc_attr($rapidapi_host); ?>" class="regular-text" />
+                                <p class="description">Host da API Instagram (padrão: instagram-bulk-profile-scrapper.p.rapidapi.com)</p>
                             </td>
                         </tr>
                     </table>
                     
                     <p class="submit">
-                        <input type="submit" name="save_api_settings" class="button-primary" value="Salvar Configurações" />
+                        <input type="submit" name="save_api_settings" class="button-primary" value="💾 Salvar Configurações" />
                     </p>
                 </form>
+            </div>
+            
+            <div class="card">
+                <h2>🔄 Processamento Manual</h2>
+                <p>Force o processamento de novos pedidos e busca de avatares.</p>
+                
+                <form method="post">
+                    <?php wp_nonce_field('process_orders'); ?>
+                    <p class="submit">
+                        <input type="submit" name="process_orders_manual" class="button-secondary" value="🚀 Processar Pedidos Agora" />
+                    </p>
+                </form>
+            </div>
                 
                 <h3>Instruções</h3>
                 <div class="notice notice-info">
